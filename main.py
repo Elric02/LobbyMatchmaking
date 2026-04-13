@@ -38,31 +38,31 @@ def matchmaking(round, players, max_players):
             start += size
         return groups
 
-def calculate_score(results):
+def calculate_score(results, max_players, round_factors=None):
     '''
     Calculate the total scores for each player based on their results in every previous round.
 
     :param results: a dictionary where the keys are round numbers and the values are lists of dictionaries with player, lobby, and position (e.g. {1: [{"player": "Alice", "lobby": 1, "position": 1}, {"player": "Bob", "lobby": 1, "position": 2}, {"player": "Charlie", "lobby": 2, "position": 1}]})
     :type results: dict(int, list(dict(str, int)))
+    :param max_players: the maximum number of players that can be in a match
+    :type max_players: int
     :return: a dictionary where the keys are player names and the values are their total scores (e.g. {"Alice": 100, "Bob": 80, "Charlie": 90})
     '''
     scores = {}
+    round = 0
+    round_factors = [1 for _ in range(len(results))] if round_factors is None else round_factors # Score factor for each round, default is 1 (full score)
+    if len(round_factors) < len(results):
+        raise ValueError("round_factors must have at least as many elements as there are rounds in results")
     for round_results in results.values():
+        round += 1
         for result in round_results:
             player = result["player"]
+            lobby = result["lobby"]
             position = result["position"]
-            if position == 1:
-                score = 100
-            elif position == 2:
-                score = 80
-            elif position == 3:
-                score = 60
-            elif position == 4:
-                score = 40
-            elif position == 5:
-                score = 20
+            if round == 1: # Don't take into account which lobby it is if it's the first round
+                score = max_players - position + 1
             else:
-                score = 0
+                score = (max_players - ((position + 1) * lobby)) * round_factors[round - 1]
             scores[player] = scores.get(player, 0) + score
     return scores
 
@@ -92,19 +92,25 @@ results = {
         {"player": "Dave", "lobby": 1, "position": 4},
         {"player": "Eve", "lobby": 1, "position": 5},
         {"player": "Frank", "lobby": 1, "position": 6},
+        {"player": "Arthur", "lobby": 1, "position": 7},
+        {"player": "Gene", "lobby": 1, "position": 8},
         {"player": "Grace", "lobby": 2, "position": 1},
         {"player": "Hector", "lobby": 2, "position": 2},
         {"player": "Ivy", "lobby": 2, "position": 3},
         {"player": "Jack", "lobby": 2, "position": 4},
         {"player": "Kira", "lobby": 2, "position": 5},
         {"player": "Liam", "lobby": 2, "position": 6},
+        {"player": "Xavier", "lobby": 2, "position": 7},
+        {"player": "Misha", "lobby": 2, "position": 8},
         {"player": "Mia", "lobby": 3, "position": 1},
         {"player": "Noah", "lobby": 3, "position": 2},
         {"player": "Olivia", "lobby": 3, "position": 3},
         {"player": "Paul", "lobby": 3, "position": 4},
         {"player": "Quinn", "lobby": 3, "position": 5},
-        {"player": "Riley", "lobby": 3, "position": 6}
+        {"player": "Riley", "lobby": 3, "position": 6},
+        {"player": "Loulou", "lobby": 3, "position": 7},
+        {"player": "Fifi", "lobby": 3, "position": 8}
         ]
 }
 
-print(calculate_score(results))
+print(calculate_score(results, 8, [0.5, 1, 1, 0.8, 0.8]))
