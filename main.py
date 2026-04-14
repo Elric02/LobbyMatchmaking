@@ -16,27 +16,22 @@ def matchmaking(round, players, max_players):
     # For the first round, we randomly shuffle the players and group them into matches of max_players (or closest)
     if round == 1:
         random.shuffle(players)
-        groups = []
-        for i in range(0, len(players), max_players):
-            group = [player[0] for player in players[i:i + max_players]]
-            groups.append(group)
-        return groups
     # For next rounds, we sort the players by score and group them into matches of max_players (or closest)
     else:
         players.sort(key=lambda x: x[1], reverse=True) # Sort by score descending
-        n = len(players)
-        g = (n + max_players - 1) // max_players # Number of groups
-        base_size = n // g
-        extra = n % g
-        group_sizes = [base_size + 1] * extra + [base_size] * (g - extra)
-        print("Group sizes:", group_sizes)
-        groups = []
-        start = 0
-        for size in group_sizes:
-            group = [player[0] for player in players[start:start + size]]
-            groups.append(group)
-            start += size
-        return groups
+    n = len(players)
+    g = (n + max_players - 1) // max_players # Number of groups
+    base_size = n // g
+    extra = n % g
+    group_sizes = [base_size + 1] * extra + [base_size] * (g - extra)
+    print("Group sizes:", group_sizes)
+    groups = []
+    start = 0
+    for size in group_sizes:
+        group = [player[0] for player in players[start:start + size]]
+        groups.append(group)
+        start += size
+    return groups
 
 def calculate_score(results, max_players, round_factors=None):
     '''
@@ -82,7 +77,6 @@ players = [
     ("Sage", 245), ("Tess", 20), ("Uri", 250), ("Vera", 15)
 ]
 
-print(matchmaking(2, players[:14], 6))
 
 results = {
     1: [
