@@ -1,4 +1,7 @@
 import random
+from faker import Faker
+import pprint
+
 
 def matchmaking(round, players, max_players):
     '''
@@ -61,6 +64,43 @@ def calculate_score(results, max_players, round_factors=None):
             scores[player] = scores.get(player, 0) + score
     return scores
 
+def generate_random_results(nb_players, max_players, nb_rounds):
+    '''
+    Generate random results for testing purposes.
+
+    :param nb_players: the number of players to generate results for
+    :type nb_players: int
+    :param max_players: the maximum number of players that can be in a match
+    :type max_players: int
+    :param nb_rounds: the number of rounds to generate results for
+    :type nb_rounds: int
+    :return: a dictionary where the keys are round numbers and the values are lists of dictionaries with player, lobby, and position (e.g. {1: [{"player": "Alice", "lobby": 1, "position": 1}, {"player": "Bob", "lobby": 1, "position": 2}, {"player": "Charlie", "lobby": 2, "position": 1}]})
+    '''
+
+    # Create the list of players
+    fake = Faker()
+    players = []
+    for _ in range(nb_players):
+        name = fake.name()
+        players.append((name, 0)) # Initial score is 0
+
+    groups = matchmaking(1, players, max_players)
+    print("ROUND 1")
+    print("LOBBIES:", groups)
+
+    results = {}
+    
+    round_results = []
+    for lobby, group in enumerate(groups):
+        random.shuffle(group)
+        for position, player in enumerate(group):
+            round_results.append({"player": player, "lobby": lobby+1, "position": position+1})
+        results[1] = round_results
+
+    print("RESULTS:")
+    pprint.pp(results[1])
+    return results
+
 
 players = [
     ("Alice", 100), ("Bob", 150), ("Charlie", 120), ("Dave", 130),
@@ -77,6 +117,7 @@ players = [
     ("Sage", 245), ("Tess", 20), ("Uri", 250), ("Vera", 15)
 ]
 
+print(matchmaking(1, players[:14], 6))
 
 results = {
     1: [
@@ -108,3 +149,5 @@ results = {
 }
 
 print(calculate_score(results, 8, [0.5, 1, 1, 0.8, 0.8]))
+
+results = generate_random_results(25, 8, 3)
