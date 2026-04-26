@@ -1,0 +1,55 @@
+[GSHEET]
+key = 0
+
+
+[USERNAMES]
+# INPUT
+# The name of the sheet for the initial usernames list
+Sheet: Règles et games
+# The range of cells for the initial usernames list
+Range: F3:F51
+
+
+# Add a [GAMEx] section for every new lobby (x being the number of the lobby, i.e. 1, 2, 3 etc.)
+[GAME1]
+# OUTPUT
+# The name of the sheet for the list of usernames for that game (which will be ordered to accomodate the lobbies and then printed on the sheet)
+UsernamesSheet: Règles et games
+# The range of cells for the list of usernames for that game (same)
+UsernamesRange: I3:I51
+
+# INPUT
+# The name of the sheet for the scores of that game
+ScoresSheet: Scores
+# The range of cells for the list of usernames that got a score at that game
+ScoresUsernameRange: B10:B57
+# The range of cells for the scores of that game (the rows are supposed to correspond to the usernames defined in ScoresUsernameRange)
+ScoresRange: G10:G57
+
+
+[GAME2]
+UsernamesSheet: Règles et games
+UsernamesRange: O3:O51
+
+ScoresSheet: Scores
+ScoresUsernameRange: H10:H57
+ScoresRange: M10:M57
+
+
+[GAME3]
+UsernamesSheet: Règles et games
+UsernamesRange: U3:U51
+
+ScoresSheet: Scores
+ScoresUsernameRange: N10:N57
+ScoresRange: S10:S57
+
+
+[RESULTS]
+# OUTPUT
+# The name of the sheet to print the final results
+Sheet: Scores
+# The range of cells to print the usernames for which there is a final results
+UsernamesRange: U10:U57
+# The range of cells to print the final results (the rows are supposed to correspond to the usernames defined in UsernamesRange)
+ResultsRange: V10:V57

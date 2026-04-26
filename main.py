@@ -1,6 +1,7 @@
 import random
 from faker import Faker
 import pprint
+import configparser
 
 
 def matchmaking(round, players, max_players):
@@ -107,6 +108,9 @@ def generate_random_results(nb_players, max_players, nb_rounds):
     
     return results
 
+def get_google_sheets_data():
+    print("TBD")
+
 
 players = [
     ("Alice", 100), ("Bob", 150), ("Charlie", 120), ("Dave", 130),
@@ -157,3 +161,4 @@ results = {
 print(calculate_score(results, 8, [0.5, 1, 1, 0.8, 0.8]))
 
 results = generate_random_results(11, 4, 3)
+
