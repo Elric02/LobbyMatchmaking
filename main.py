@@ -64,7 +64,7 @@ def calculate_score(results, max_players, round_factors=None):
             scores[player] = scores.get(player, 0) + score
     return scores
 
-def generate_random_results(nb_players, max_players, nb_rounds):
+def generate_random_results(nb_players, max_players, round):
     '''
     Generate random results for testing purposes.
 
@@ -72,8 +72,8 @@ def generate_random_results(nb_players, max_players, nb_rounds):
     :type nb_players: int
     :param max_players: the maximum number of players that can be in a match
     :type max_players: int
-    :param nb_rounds: the number of rounds to generate results for
-    :type nb_rounds: int
+    :param round: which round to generate results for (1-x)
+    :type round: int
     :return: a dictionary where the keys are round numbers and the values are lists of dictionaries with player, lobby, and position (e.g. {1: [{"player": "Alice", "lobby": 1, "position": 1}, {"player": "Bob", "lobby": 1, "position": 2}, {"player": "Charlie", "lobby": 2, "position": 1}]})
     '''
 
@@ -91,10 +91,10 @@ def generate_random_results(nb_players, max_players, nb_rounds):
     results = {}
     
     round_results = []
-    for lobby, group in enumerate(groups):
+    for lobby_nr, group in enumerate(groups):
         random.shuffle(group)
         for position, player in enumerate(group):
-            round_results.append({"player": player, "lobby": lobby+1, "position": position+1})
+            round_results.append({"player": player, "lobby": lobby_nr+1, "position": position+1})
         results[1] = round_results
 
     print("RESULTS:")
@@ -150,4 +150,4 @@ results = {
 
 print(calculate_score(results, 8, [0.5, 1, 1, 0.8, 0.8]))
 
-results = generate_random_results(25, 8, 3)
+results = generate_random_results(25, 8, 1)
