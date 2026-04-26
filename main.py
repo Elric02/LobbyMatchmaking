@@ -57,10 +57,7 @@ def calculate_score(results, max_players, round_factors=None):
             player = result["player"]
             lobby = result["lobby"]
             position = result["position"]
-            if round == 1: # Don't take into account which lobby it is if it's the first round
-                score = max_players - position + 1
-            else:
-                score = (max_players - ((position + 1) * lobby)) * round_factors[round - 1]
+            score = (max_players - position) * round_factors[round - 1]
             scores[player] = scores.get(player, 0) + score
     scores = list(scores.items())
     return scores
@@ -104,6 +101,7 @@ def generate_random_results(nb_players, max_players, nb_rounds):
 
         print("RESULTS:")
         pprint.pp(results[current_round])
+        print("SCORES:")
         scores = calculate_score(results, max_players)
         pprint.pp(scores)
     
@@ -158,4 +156,4 @@ results = {
 
 print(calculate_score(results, 8, [0.5, 1, 1, 0.8, 0.8]))
 
-results = generate_random_results(9, 4, 3)
+results = generate_random_results(11, 4, 3)
