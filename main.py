@@ -44,7 +44,7 @@ def calculate_score(results, max_players, round_factors=None):
     :type results: dict(int, list(dict(str, int)))
     :param max_players: the maximum number of players that can be in a match
     :type max_players: int
-    :return: a dictionary where the keys are player names and the values are their total scores (e.g. {"Alice": 100, "Bob": 80, "Charlie": 90})
+    :return: a list of tuples containing the names and scores of the players (e.g. [("Alice", 100), ("Bob", 150), ("Charlie", 120)])
     '''
     scores = {}
     round = 0
@@ -62,9 +62,10 @@ def calculate_score(results, max_players, round_factors=None):
             else:
                 score = (max_players - ((position + 1) * lobby)) * round_factors[round - 1]
             scores[player] = scores.get(player, 0) + score
+    scores = list(scores.items())
     return scores
 
-def generate_random_results(nb_players, max_players, round):
+def generate_random_results(nb_players, max_players, nb_rounds):
     '''
     Generate random results for testing purposes.
 
@@ -72,33 +73,40 @@ def generate_random_results(nb_players, max_players, round):
     :type nb_players: int
     :param max_players: the maximum number of players that can be in a match
     :type max_players: int
-    :param round: which round to generate results for (1-x)
-    :type round: int
+    :param nb_rounds: how many rounds to generate
+    :type nb_rounds: int
     :return: a dictionary where the keys are round numbers and the values are lists of dictionaries with player, lobby, and position (e.g. {1: [{"player": "Alice", "lobby": 1, "position": 1}, {"player": "Bob", "lobby": 1, "position": 2}, {"player": "Charlie", "lobby": 2, "position": 1}]})
     '''
 
+    if nb_rounds < 1:
+        raise ValueError("nb_rounds must be at least 1")
+
     # Create the list of players
     fake = Faker()
-    players = []
+    scores = []
     for _ in range(nb_players):
         name = fake.name()
-        players.append((name, 0)) # Initial score is 0
-
-    groups = matchmaking(1, players, max_players)
-    print("ROUND 1")
-    print("LOBBIES:", groups)
+        scores.append((name, 0)) # Initial score is 0
 
     results = {}
-    
-    round_results = []
-    for lobby_nr, group in enumerate(groups):
-        random.shuffle(group)
-        for position, player in enumerate(group):
-            round_results.append({"player": player, "lobby": lobby_nr+1, "position": position+1})
-        results[1] = round_results
 
-    print("RESULTS:")
-    pprint.pp(results[1])
+    for current_round in range(1, nb_rounds+1):
+        print("----- ROUND", current_round, "-----")
+        groups = matchmaking(current_round, scores, max_players)
+        print("LOBBIES:", groups)
+        
+        round_results = []
+        for lobby_nr, group in enumerate(groups):
+            random.shuffle(group)
+            for position, player in enumerate(group):
+                round_results.append({"player": player, "lobby": lobby_nr+1, "position": position+1})
+        results[current_round] = round_results
+
+        print("RESULTS:")
+        pprint.pp(results[current_round])
+        scores = calculate_score(results, max_players)
+        pprint.pp(scores)
+    
     return results
 
 
@@ -150,4 +158,4 @@ results = {
 
 print(calculate_score(results, 8, [0.5, 1, 1, 0.8, 0.8]))
 
-results = generate_random_results(25, 8, 1)
+results = generate_random_results(9, 4, 3)
