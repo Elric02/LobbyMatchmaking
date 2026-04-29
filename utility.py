@@ -9,18 +9,22 @@ from googleapiclient.errors import HttpError
 
 
 # Retrieve the data from the Google Sheets
-# Guide to get started: https://developers.google.com/workspace/sheets/api/quickstart/python
-# Basically, if you have the credentials.json file in your main folder, you should be good to go.
-def get_google_sheets_data(config_file):
+# Guide to get started (important to setup the credentials): https://developers.google.com/workspace/sheets/api/quickstart/python
+# Basically, if you have the credentials.json file in your main folder and the Google Sheets API is enabled in your Google project, you should be good to go.
+def get_google_sheets_data(config_file, spreadsheet_id, ranges):
+    '''
+    Retrieve data from the specified Google Sheets range. Note: authentication with Google required, see guide in the comments in the code.
+    
+    :param config_file: the path to the configuration file
+    :type config_file: str
+    :param ranges: the list of the ranges to retrieve data from (one element of the array is one range, e.g. ["Scores!A2:A10"])
+    :type ranges: list(str)
+    '''
     config = configparser.ConfigParser()
     config.read(config_file)
     print(config["GSHEET"]["key"])
     # If modifying these scopes, delete the file token.json.
     SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
-
-    # The ID and range of a sample spreadsheet.
-    SAMPLE_SPREADSHEET_ID = "1lY-Gy7vqpV20dGrBmXRAhGjHvgM7ApfnLp-oNLQgYFk"
-    SAMPLE_RANGE_NAME = "Scores!A2:A10"
 
     creds = None
     # The file token.json stores the user's access and refresh tokens, and is
@@ -44,18 +48,20 @@ def get_google_sheets_data(config_file):
         service = build("sheets", "v4", credentials=creds)
         # Call the Sheets API
         sheet = service.spreadsheets()
-        result = (
-            sheet.values()
-            .get(spreadsheetId=SAMPLE_SPREADSHEET_ID, range=SAMPLE_RANGE_NAME)
-            .execute()
-        )
-        values = result.get("values", [])
-        if not values:
-            print("No data found.")
-            return
-        for row in values:
-            print(row)
+        results = []
+        for single_range in ranges:
+            result = (
+                sheet.values()
+                .get(spreadsheetId=spreadsheet_id, range=single_range)
+                .execute()
+            )
+            values = result.get("values", [])
+            if not values:
+                print("No data found for the following range:", single_range)
+            results.append(values)
+        return results
     except HttpError as err:
+        print("HTTP Error occurred:")
         print(err)
 
 
