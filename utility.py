@@ -11,18 +11,19 @@ from googleapiclient.errors import HttpError
 # Retrieve the data from the Google Sheets
 # Guide to get started (important to setup the credentials): https://developers.google.com/workspace/sheets/api/quickstart/python
 # Basically, if you have the credentials.json file in your main folder and the Google Sheets API is enabled in your Google project, you should be good to go.
-def get_google_sheets_data(config_file, spreadsheet_id, ranges):
+def get_google_sheets_data(config_file, ranges):
     '''
     Retrieve data from the specified Google Sheets range. Note: authentication with Google required, see guide in the comments in the code.
     
     :param config_file: the path to the configuration file
     :type config_file: str
-    :param ranges: the list of the ranges to retrieve data from (one element of the array is one range, e.g. ["Scores!A2:A10"])
+    :param ranges: a list containing the ranges to retrieve data from (e.g. ["Scores!A2:A10", "Scores!B2:B10"])
     :type ranges: list(str)
+    :return: a list of lists containing the values retrieved from the specified ranges
     '''
     config = configparser.ConfigParser()
     config.read(config_file)
-    print(config["GSHEET"]["key"])
+    spreadsheet_id = config["GSHEET"]["SheetID"]
     # If modifying these scopes, delete the file token.json.
     SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
