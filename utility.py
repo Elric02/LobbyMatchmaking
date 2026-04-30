@@ -18,7 +18,7 @@ def connect_google_sheets():
     :return: the service object to interact with the Google Sheets API
     '''
     # If modifying these scopes, delete the file token.json.
-    SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+    SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
     creds = None
     # The file token.json stores the user's access and refresh tokens, and is
@@ -100,16 +100,17 @@ def write_google_sheets_data(config, ranges, values):
         # Call the Sheets API
         sheet = service.spreadsheets()
         body = {"values": values}
-        result = (
-            sheet.values()
-            .update(
-                spreadsheetId=spreadsheet_id,
-                range=ranges[0],
-                valueInputOption="RAW",
-                body=body,
+        for single_range in ranges:
+            result = (
+                sheet.values()
+                .update(
+                    spreadsheetId=spreadsheet_id,
+                    range=single_range,
+                    valueInputOption="RAW",
+                    body=body,
+                )
+                .execute()
             )
-            .execute()
-        )
         print(f"{result.get('updatedCells')} cells updated.")
     except HttpError as err:
         print("HTTP Error occurred:")
@@ -123,7 +124,7 @@ def matchmaking(round, players, max_players):
     '''
     Matchmaking function to group players into matches for each round.
 
-    :param round: the current round number (starting at 1)
+    :param round: the current round number (starting at 0 for the initialization of the first round)
     :type round: int
     :param players: the names and scores of the players (e.g. [("Alice", 100), ("Bob", 150), ("Charlie", 120)])
     :type players: list(tuple(str, int))
@@ -133,7 +134,7 @@ def matchmaking(round, players, max_players):
     '''
 
     # For the first round, we randomly shuffle the players and group them into matches of max_players (or closest)
-    if round == 1:
+    if round == 0:
         random.shuffle(players)
     # For next rounds, we sort the players by score and group them into matches of max_players (or closest)
     else:

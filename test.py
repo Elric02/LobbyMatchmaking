@@ -29,7 +29,7 @@ def generate_random_results(nb_players, max_players, nb_rounds):
 
     results = {}
 
-    for current_round in range(1, nb_rounds+1):
+    for current_round in range(nb_rounds):
         print("----- ROUND", current_round, "-----")
         groups = utility.matchmaking(current_round, scores, max_players)
         print("LOBBIES:", groups)
