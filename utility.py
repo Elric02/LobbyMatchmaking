@@ -8,22 +8,15 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 
-# Retrieve the data from the Google Sheets
-# Guide to get started (important to setup the credentials): https://developers.google.com/workspace/sheets/api/quickstart/python
-# Basically, if you have the credentials.json file in your main folder and the Google Sheets API is enabled in your Google project, you should be good to go.
-def get_google_sheets_data(config_file, ranges):
+
+### GOOGLE SHEETS API STUFF ###
+
+def connect_google_sheets():
     '''
-    Retrieve data from the specified Google Sheets range. Note: authentication with Google required, see guide in the comments in the code.
+    Connect to the Google Sheets API and return the service object (this function is mainly used by other functions in this file).
     
-    :param config_file: the path to the configuration file
-    :type config_file: str
-    :param ranges: a list containing the ranges to retrieve data from (e.g. ["Scores!A2:A10", "Scores!B2:B10"])
-    :type ranges: list(str)
-    :return: a list of lists containing the values retrieved from the specified ranges
+    :return: the service object to interact with the Google Sheets API
     '''
-    config = configparser.ConfigParser()
-    config.read(config_file)
-    spreadsheet_id = config["GSHEET"]["SheetID"]
     # If modifying these scopes, delete the file token.json.
     SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
@@ -47,6 +40,31 @@ def get_google_sheets_data(config_file, ranges):
 
     try:
         service = build("sheets", "v4", credentials=creds)
+        return service
+    except HttpError as err:
+        print("HTTP Error occurred:")
+        print(err)
+
+
+# Retrieve the data from the Google Sheets
+# Guide to get started (important to setup the credentials): https://developers.google.com/workspace/sheets/api/quickstart/python
+# Basically, if you have the credentials.json file in your main folder and the Google Sheets API is enabled in your Google project, you should be good to go.
+def get_google_sheets_data(config_file, ranges):
+    '''
+    Retrieve data from the specified Google Sheets range. Note: authentication with Google required, see guide in the comments in the code.
+    
+    :param config_file: the path to the configuration file
+    :type config_file: str
+    :param ranges: a list containing the ranges to retrieve data from (e.g. ["Scores!A2:A10", "Scores!B2:B10"])
+    :type ranges: list(str)
+    :return: a list of lists containing the values retrieved from the specified ranges
+    '''
+    config = configparser.ConfigParser()
+    config.read(config_file)
+    spreadsheet_id = config["GSHEET"]["SheetID"]
+
+    try:
+        service = connect_google_sheets()
         # Call the Sheets API
         sheet = service.spreadsheets()
         results = []
@@ -66,7 +84,44 @@ def get_google_sheets_data(config_file, ranges):
         print(err)
 
 
+def write_google_sheets_data(config_file, ranges, values):
+    '''
+    Write data to the specified Google Sheets range. Note: authentication with Google required, see guide in the comments in the code.
+    
+    :param config_file: the path to the configuration file
+    :type config_file: str
+    :param ranges: the ranges to write data to (e.g. ["Scores!A2:A10"])
+    :type ranges: list(str)
+    :param values: a list of lists containing the values to write to the specified ranges (one element per range)
+    :type values: list(list(str))
+    '''
+    config = configparser.ConfigParser()
+    config.read(config_file)
+    spreadsheet_id = config["GSHEET"]["SheetID"]
 
+    try:
+        service = connect_google_sheets()
+        # Call the Sheets API
+        sheet = service.spreadsheets()
+        body = {"values": values}
+        result = (
+            sheet.values()
+            .update(
+                spreadsheetId=spreadsheet_id,
+                range=range,
+                valueInputOption="RAW",
+                body=body,
+            )
+            .execute()
+        )
+        print(f"{result.get('updatedCells')} cells updated.")
+    except HttpError as err:
+        print("HTTP Error occurred:")
+        print(err)
+
+
+
+### ALGORITHM STUFF ###
 
 def matchmaking(round, players, max_players):
     '''
