@@ -4,7 +4,7 @@ import utility
 import test
 
 
-def process_round(config_file, round_number):
+def process_round(config_file, round_number, prioritize_host=None):
     '''
     Main function to run the matchmaking algorithm and interact with Google Sheets.
 
@@ -12,6 +12,8 @@ def process_round(config_file, round_number):
     :type config_file: str
     :param round_number: the current round number. Use 0 to setup the first round, or a positive integer to process the specified round.
     :type round_number: int
+    :param prioritize_host: the username of the player to prioritize for hosting lobbies. If unspecified, no player is prioritized.
+    :type prioritize_host: str
     '''
     config = configparser.ConfigParser()
     config.read(config_file, encoding='utf-8')
@@ -31,6 +33,11 @@ def process_round(config_file, round_number):
 
     to_write = []
     for group in groups:
+        # If there is a username to prioritize for hosting, put it at the top of the group
+        if prioritize_host:
+            if prioritize_host in group:
+                group.remove(prioritize_host)
+                group.insert(0, prioritize_host)
         for i in range(max_players):
             if i < len(group):
                 to_write.append(group[i])
@@ -47,4 +54,4 @@ def process_round(config_file, round_number):
 # Test with random values, uncomment to run
 #results = test.generate_random_results(11, 4, 3)
 
-process_round("configs/config_worms.ini", 0)
+process_round("configs/config_worms.ini", 0, prioritize_host="VelNewt")
