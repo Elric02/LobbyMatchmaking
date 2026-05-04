@@ -47,4 +47,4 @@ def process_round(config_file, round_number):
 # Test with random values, uncomment to run
 #results = test.generate_random_results(11, 4, 3)
 
-process_round("config_worms.ini", 0)
+process_round("configs/config_worms.ini", 0)
