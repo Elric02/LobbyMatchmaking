@@ -99,8 +99,8 @@ def write_google_sheets_data(config, ranges, values):
         service = connect_google_sheets()
         # Call the Sheets API
         sheet = service.spreadsheets()
-        body = {"values": values}
-        for single_range in ranges:
+        for i, single_range in enumerate(ranges):
+            body = {"values": values[i]}
             result = (
                 sheet.values()
                 .update(
@@ -157,8 +157,8 @@ def calculate_score(results, max_players, round_factors=None):
     '''
     Calculate the total scores for each player based on their results in every previous round.
 
-    :param results: a dictionary where the keys are round numbers and the values are lists of dictionaries with player, lobby, and position (e.g. {1: [{"player": "Alice", "lobby": 1, "position": 1}, {"player": "Bob", "lobby": 1, "position": 2}, {"player": "Charlie", "lobby": 2, "position": 1}]})
-    :type results: dict(int, list(dict(str, int)))
+    :param results: a dictionary where the keys are round numbers and the values are lists of dictionaries with player, lobby, and points/position (e.g. {1: [{"player": "Alice", "lobby": 1, "position": 1}, {"player": "Bob", "lobby": 1, "position": 2}, {"player": "Charlie", "lobby": 2, "position": 1}]})
+    :type results: dict(int, list(dict(str, str|int|float)))
     :param max_players: the maximum number of players that can be in a match
     :type max_players: int
     :return: a list of tuples containing the names and scores of the players (e.g. [("Alice", 100), ("Bob", 150), ("Charlie", 120)])
