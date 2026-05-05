@@ -5,7 +5,7 @@ import utility
 import test
 
 
-def process_round(config_file, round_number, generate_next_round=False, prioritize_host=None, write_results=True):
+def process_round(config_file, round_number, generate_next_round=False, write_results=True):
     '''
     Main function to run the matchmaking algorithm and interact with Google Sheets.
 
@@ -15,8 +15,8 @@ def process_round(config_file, round_number, generate_next_round=False, prioriti
     :type round_number: int
     :param generate_next_round: whether to generate the lobbies for the next round. Ignored for round number 0.
     :type generate_next_round: bool
-    :param prioritize_host: the username of the player to prioritize for hosting lobbies. If unspecified, no player is prioritized.
-    :type prioritize_host: str
+    :param write_results: whether to write the results to Google Sheets. If False, the function will return the values that would be written to Google Sheets instead (used for processing results in process_results function).
+    :type write_results: bool
     :return (if write_results is False): a list of lists containing the values that would be written to the specified Google Sheets ranges (one element per range)
     '''
     config = configparser.ConfigParser()
@@ -79,10 +79,10 @@ def process_round(config_file, round_number, generate_next_round=False, prioriti
         temp_to_write = [] # Add another list for the next range
         for group in groups:
             # If there is a username to prioritize for hosting, put it at the top of the group
-            if prioritize_host:
-                if prioritize_host in group:
-                    group.remove(prioritize_host)
-                    group.insert(0, prioritize_host)
+            prioritize_host = config['PARAMS']['PrioritizeHost']
+            if prioritize_host != "" and prioritize_host in group:
+                group.remove(prioritize_host)
+                group.insert(0, prioritize_host)
             for i in range(max_players):
                 if i < len(group):
                     temp_to_write.append([group[i]])
@@ -141,8 +141,8 @@ def process_results(config_file, nb_rounds):
 # Test with random values, uncomment to run
 #results = test.generate_random_results(11, 4, 3)
 
-#process_round("configs/config_worms.ini", round_number=0, prioritize_host="VelNewt")
+process_round("configs/config_worms.ini", round_number=0)
 #process_round("configs/config_worms.ini", round_number=1, generate_next_round=True, prioritize_host="VelNewt")
 #process_round("configs/config_worms.ini", round_number=2, generate_next_round=True, prioritize_host="VelNewt")
 #process_round("configs/config_worms.ini", round_number=3, generate_next_round=False)
-process_results("configs/config_worms.ini", nb_rounds=3)
+#process_results("configs/config_worms.ini", nb_rounds=3)
