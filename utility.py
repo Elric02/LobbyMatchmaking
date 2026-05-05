@@ -153,7 +153,7 @@ def matchmaking(round, players, max_players):
         start += size
     return groups
 
-def calculate_score(results, max_players, round_factors=None):
+def calculate_score(results, max_players, round_factors=0, lobby_factor=0):
     '''
     Calculate the total scores for each player based on their results in every previous round.
 
@@ -161,11 +161,19 @@ def calculate_score(results, max_players, round_factors=None):
     :type results: dict(int, list(dict(str, str|int|float)))
     :param max_players: the maximum number of players that can be in a match
     :type max_players: int
+    :param round_factors: score factor for each round, default is 1 (full score). Usually defined in the config file. Can be a list of numbers (one per round) or just 0 for default.
+    :type round_factors: list(float) or int
+    :param lobby_factor: lobby factor multiplier that will be affect the lobby factor, default is 1 (full score). Usually defined in the config file. Can be any float, or 0 for default. Note: game 1 does not take this into account since matchmaking was random.
+    :type lobby_factor: float
     :return: a list of tuples containing the names and scores of the players (e.g. [("Alice", 100), ("Bob", 150), ("Charlie", 120)])
     '''
     scores = {}
     round = 0
-    round_factors = [1 for _ in range(len(results))] if round_factors is None else round_factors # Score factor for each round, default is 1 (full score)
+    round_factors = [1 for _ in range(len(results))] if round_factors == 0 else round_factors # Score factor for each round, default is 1 (full score)
+    nb_lobbies = max(result["lobby"] for round_results in results.values() for result in round_results) # Calculate the number of lobbies based on the results
+    lobby_factors = [1 for _ in range(nb_lobbies)] if lobby_factor == 0 else [lobby_factor*lobby+1 for lobby in reversed(range(nb_lobbies))] # Lobby factor for each round, default is 1 (full score)
+    print("Round factors:", round_factors)
+    print("Lobby factors:", lobby_factors)
     if len(round_factors) < len(results):
         raise ValueError("round_factors must have at least as many elements as there are rounds in results")
     for round_results in results.values():
@@ -174,7 +182,10 @@ def calculate_score(results, max_players, round_factors=None):
             player = result["player"]
             lobby = result["lobby"]
             position = result["position"]
+            # Calculate the score based on position, round factor, and lobby factor
             score = (max_players - position) * round_factors[round - 1]
+            if round != 1: # Lobby factor is considered only if round >1
+                score *= lobby_factors[lobby - 1] 
             scores[player] = scores.get(player, 0) + score
     scores = list(scores.items())
     return scores
