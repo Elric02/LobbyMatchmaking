@@ -22,35 +22,43 @@ def process_round(config_file, round_number, generate_next_round, prioritize_hos
     config.read(config_file, encoding='utf-8')
     max_players = int(config['PARAMS']['MaxPlayers'])
 
-    # Which ranges do we need in the Sheets
-    needed_ranges = []
     if round_number == 0:
+        needed_ranges = [] # Which ranges do we need in the Sheets
         needed_ranges.append(f"{config['USERNAMES']['Sheet']}!{config['USERNAMES']['Range']}")
-    else:
-        needed_ranges.append(f"{config[f'GAME{round_number}']['ScoresSheet']}!{config[f'GAME{round_number}']['ScoresUsernameRange']}")
-        needed_ranges.append(f"{config[f'GAME{round_number}']['ScoresSheet']}!{config[f'GAME{round_number}']['ScoresRange']}")
-        needed_ranges.append(f"{config[f'GAME{round_number}']['IntermediateResultsSheet']}!{config[f'GAME{round_number}']['IntermediateResultsUsernameRange']}")
-    gsheets_data = utility.get_google_sheets_data(config, ranges=needed_ranges)
+        gsheets_data = utility.get_google_sheets_data(config, ranges=needed_ranges)
+        usernames = gsheets_data[0]
+        print("usernames:", usernames)
+        # Scoring
+        scores = [(username[0], 0) for username in usernames if username] # Initial score is 0
+        groups = utility.matchmaking(0, scores, max_players)
 
-    usernames = gsheets_data[0]
-    print("usernames:", usernames)
-    if round_number == 0:
-        usernames_with_results = [(username[0], 0) for username in usernames if username] # Initial score is 0
     else:
-        results = gsheets_data[1]
-        usernames_with_results = []
-        for i in range(len(usernames)):
-            if len(usernames[i]) > 0:
-                usernames_with_results.append({
-                    "player": usernames[i][0],
-                    "lobby": math.floor(i / max_players) + 1, # Calculate lobby number based on index and max players
-                    "position": float(results[i][0])
+        usernames_with_results = {}
+        # Process each round until and including round_number
+        for current_round in range(1, round_number+1):
+            needed_ranges = []
+            print("Now processing round", current_round, "out of", round_number)
+            needed_ranges.append(f"{config[f'GAME{current_round}']['ScoresSheet']}!{config[f'GAME{current_round}']['ScoresUsernameRange']}")
+            needed_ranges.append(f"{config[f'GAME{current_round}']['ScoresSheet']}!{config[f'GAME{current_round}']['ScoresRange']}")
+            needed_ranges.append(f"{config[f'GAME{current_round}']['IntermediateResultsSheet']}!{config[f'GAME{current_round}']['IntermediateResultsUsernameRange']}")
+            gsheets_data = utility.get_google_sheets_data(config, ranges=needed_ranges)
+            usernames = gsheets_data[0]
+            print("usernames:", usernames)
+            # Scoring
+            results = gsheets_data[1]
+            temp_usernames_with_results = []
+            for i in range(len(usernames)):
+                if len(usernames[i]) > 0:
+                    temp_usernames_with_results.append({
+                        "player": usernames[i][0],
+                        "lobby": math.floor(i / max_players) + 1, # Calculate lobby number based on index and max players
+                        "position": float(results[i][0])
                     })
-        print("usernames_with_results:", usernames_with_results)
-    usernames_with_results = {1: usernames_with_results} # Round 1
-    scores = utility.calculate_score(usernames_with_results, max_players)
+            print("temp_usernames_with_results:", temp_usernames_with_results)
+            usernames_with_results[current_round] = temp_usernames_with_results
+        scores = utility.calculate_score(usernames_with_results, max_players)
+        groups = utility.matchmaking(round_number, scores, max_players)
 
-    groups = utility.matchmaking(round_number, scores, max_players)
     to_write = [[]]
     # Write intermediate results
     for username in gsheets_data[2]:
@@ -87,5 +95,7 @@ def process_round(config_file, round_number, generate_next_round, prioritize_hos
 # Test with random values, uncomment to run
 #results = test.generate_random_results(11, 4, 3)
 
-#process_round("configs/config_worms.ini", 0, prioritize_host="VelNewt")
-process_round("configs/config_worms.ini", round_number=1, generate_next_round=True, prioritize_host="VelNewt")
+#process_round("configs/config_worms.ini", round_number=0, prioritize_host="VelNewt")
+#process_round("configs/config_worms.ini", round_number=1, generate_next_round=True, prioritize_host="VelNewt")
+#process_round("configs/config_worms.ini", round_number=2, generate_next_round=True, prioritize_host="VelNewt")
+process_round("configs/config_worms.ini", round_number=3, generate_next_round=False)
