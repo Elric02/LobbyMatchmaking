@@ -5,7 +5,7 @@ import utility
 import test
 
 
-def process_round(config_file, round_number, generate_next_round=False, prioritize_host=None):
+def process_round(config_file, round_number, generate_next_round=False, prioritize_host=None, write_results=True):
     '''
     Main function to run the matchmaking algorithm and interact with Google Sheets.
 
@@ -17,6 +17,7 @@ def process_round(config_file, round_number, generate_next_round=False, prioriti
     :type generate_next_round: bool
     :param prioritize_host: the username of the player to prioritize for hosting lobbies. If unspecified, no player is prioritized.
     :type prioritize_host: str
+    :return (if write_results is False): a list of lists containing the values that would be written to the specified Google Sheets ranges (one element per range)
     '''
     config = configparser.ConfigParser()
     config.read(config_file, encoding='utf-8')
@@ -88,6 +89,8 @@ def process_round(config_file, round_number, generate_next_round=False, prioriti
                 else:
                     temp_to_write.append([""]) # Pad with empty strings to fill the range
         to_write.append(temp_to_write)
+    if not write_results: # Return the output rather than write it on Google Sheets (used for processing results)
+        return to_write
     needed_ranges = []
     if round_number == 0:
         needed_ranges.append(f"{config['GAME1']['UsernamesSheet']}!{config['GAME1']['UsernamesRange']}")
@@ -99,10 +102,47 @@ def process_round(config_file, round_number, generate_next_round=False, prioriti
     utility.write_google_sheets_data(config, ranges=needed_ranges, values=to_write)
 
 
+def process_results(config_file, nb_rounds):
+    '''
+    Function to process the final results and write the scores in the Google Sheets.
+
+    :param config_file: the path to the configuration file
+    :type config_file: str
+    :param nb_rounds: the number of rounds to process
+    :type nb_rounds: int
+    '''
+    config = configparser.ConfigParser()
+    config.read(config_file, encoding='utf-8')
+
+    print("Now writing final results")
+    needed_ranges = [
+        f"{config[f'GAME{nb_rounds}']['IntermediateResultsSheet']}!{config[f'GAME{nb_rounds}']['IntermediateResultsUsernameRange']}",
+        f"{config[f'GAME{nb_rounds}']['IntermediateResultsSheet']}!{config[f'GAME{nb_rounds}']['IntermediateResultsRange']}"
+    ]
+    gsheets_data = utility.get_google_sheets_data(config, ranges=needed_ranges)
+    names, scores = gsheets_data
+    # Pair, filter empties, sort alphabetically by name
+    pairs = sorted(
+        ((n[0], float(s[0])) for n, s in zip(names, scores) if len(n) > 0),
+        key=lambda x: x[0].lower()
+    )
+    # Unpack back into original format
+    sorted_names  = [[name]  for name, _  in pairs]
+    sorted_scores = [[score] for _, score in pairs]
+    final_results = [sorted_names, sorted_scores]
+    needed_ranges = [
+        f"{config['RESULTS']['Sheet']}!{config['RESULTS']['UsernamesRange']}",
+        f"{config['RESULTS']['Sheet']}!{config['RESULTS']['ResultsRange']}"
+    ]
+    print(f"Input to Google Sheets on {needed_ranges}: {final_results}")
+    utility.write_google_sheets_data(config, ranges=needed_ranges, values=final_results)
+
+
 # Test with random values, uncomment to run
 #results = test.generate_random_results(11, 4, 3)
 
-process_round("configs/config_worms.ini", round_number=0, prioritize_host="VelNewt")
-process_round("configs/config_worms.ini", round_number=1, generate_next_round=True, prioritize_host="VelNewt")
-process_round("configs/config_worms.ini", round_number=2, generate_next_round=True, prioritize_host="VelNewt")
-process_round("configs/config_worms.ini", round_number=3, generate_next_round=False)
+#process_round("configs/config_worms.ini", round_number=0, prioritize_host="VelNewt")
+#process_round("configs/config_worms.ini", round_number=1, generate_next_round=True, prioritize_host="VelNewt")
+#process_round("configs/config_worms.ini", round_number=2, generate_next_round=True, prioritize_host="VelNewt")
+#process_round("configs/config_worms.ini", round_number=3, generate_next_round=False)
+process_results("configs/config_worms.ini", nb_rounds=3)
