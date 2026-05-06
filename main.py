@@ -145,10 +145,10 @@ def process_results(config_file, nb_rounds):
 ### FLOW FOR WORMS WMD (uncomment each line to run)
 
 #process_round("configs/config_worms.ini", round_number=0)
-#process_round("configs/config_worms.ini", round_number=1, generate_next_round=True)
-#process_round("configs/config_worms.ini", round_number=2, generate_next_round=True)
-#process_round("configs/config_worms.ini", round_number=3, generate_next_round=False)
-#process_results("configs/config_worms.ini", nb_rounds=3)
+process_round("configs/config_worms.ini", round_number=1, generate_next_round=True)
+process_round("configs/config_worms.ini", round_number=2, generate_next_round=True)
+process_round("configs/config_worms.ini", round_number=3, generate_next_round=False)
+process_results("configs/config_worms.ini", nb_rounds=3)
 
 
 ### FLOW FOR YOU SUCK AT PARKING (uncomment each line to run)
@@ -159,4 +159,4 @@ def process_results(config_file, nb_rounds):
 #process_round("configs/config_ysap.ini", round_number=3, generate_next_round=True)
 #process_round("configs/config_ysap.ini", round_number=4, generate_next_round=False)
 #process_round("configs/config_ysap.ini", round_number=5, generate_next_round=False)
-process_results("configs/config_ysap.ini", nb_rounds=5)
+#process_results("configs/config_ysap.ini", nb_rounds=5)
