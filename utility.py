@@ -183,7 +183,7 @@ def calculate_score(results, max_players, round_factors=0, lobby_factor=0):
             lobby = result["lobby"]
             position = result["position"]
             # Calculate the score based on position, round factor, and lobby factor
-            score = (max_players - position) * round_factors[round - 1]
+            score = (1 + (max_players - position)) * round_factors[round - 1]
             if round != 1: # Lobby factor is considered only if round >1
                 score *= lobby_factors[lobby - 1] 
             scores[player] = scores.get(player, 0) + score
