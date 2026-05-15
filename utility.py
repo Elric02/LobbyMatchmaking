@@ -120,7 +120,7 @@ def write_google_sheets_data(config, ranges, values):
 
 ### ALGORITHMS STUFF ###
 
-def matchmaking(round, players, max_players):
+def matchmaking(round, players, max_players, prioritize_full=""):
     '''
     Matchmaking function to group players into matches for each round.
 
@@ -144,13 +144,24 @@ def matchmaking(round, players, max_players):
     base_size = n // g
     extra = n % g
     group_sizes = [base_size + 1] * extra + [base_size] * (g - extra)
-    print("Group sizes:", group_sizes)
+    print("Initial group sizes:", group_sizes)
     groups = []
     start = 0
     for size in group_sizes:
         group = [player[0] for player in players[start:start + size]]
         groups.append(group)
         start += size
+    # If the desired player is not in a "max players" group, change the group sizes
+    if prioritize_full != "":
+        player_group_index = next((i for i, group in enumerate(groups) if prioritize_full in group), None)
+        if player_group_index is not None and len(groups[player_group_index]) < max_players:
+            # Find a group with more than 1 player to take from (to avoid creating empty groups)
+            donor_group_index = next((i for i, group in enumerate(groups) if i != player_group_index and len(group) > 1), None)
+            if donor_group_index is not None:
+                # Move a player from the donor group to the player's group
+                player_to_move = groups[donor_group_index].pop() # Take the last player from the donor group
+                groups[player_group_index].append(player_to_move) # Add that player to the player's group
+                print(f"Moved {player_to_move} from group {donor_group_index+1} to group {player_group_index+1} to maximize the nb of players in the lobby of {prioritize_full}")
     return groups
 
 def calculate_score(results, max_players, round_factors=0, lobby_factor=0):

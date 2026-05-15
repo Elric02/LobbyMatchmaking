@@ -31,7 +31,7 @@ def process_round(config_file, round_number, generate_next_round=False, write_re
         #print("usernames:", usernames)
         # Scoring
         scores = [(username[0], 0) for username in usernames if username] # Initial score is 0
-        groups = utility.matchmaking(0, scores, max_players)
+        groups = utility.matchmaking(0, scores, max_players, config['PARAMS']['PrioritizeFull'])
 
     else:
         usernames_with_results = {}
@@ -61,7 +61,7 @@ def process_round(config_file, round_number, generate_next_round=False, write_re
             round_factors = [float(x) for x in config['PARAMS']['GameMultiplicators'].split(",")] if round_factors != "0" else 0
             lobby_factor = float(config['PARAMS']['LobbyMultiplicator'])
         scores = utility.calculate_score(usernames_with_results, max_players, round_factors=round_factors, lobby_factor=lobby_factor)
-        groups = utility.matchmaking(round_number, scores, max_players)
+        groups = utility.matchmaking(round_number, scores, max_players, config['PARAMS']['PrioritizeFull'])
 
     to_write = []
     if round_number > 0:
@@ -163,12 +163,12 @@ def process_results(config_file, nb_rounds):
 
 
 ### FLOW FOR MICROWORKS (uncomment each line to run)
-process_round("configs/config_microworks.ini", round_number=0)
-process_round("configs/config_microworks.ini", round_number=1, generate_next_round=True)
-process_round("configs/config_microworks.ini", round_number=2, generate_next_round=False)
-process_round("configs/config_microworks.ini", round_number=3, generate_next_round=True)
-process_round("configs/config_microworks.ini", round_number=4, generate_next_round=False)
-process_round("configs/config_microworks.ini", round_number=5, generate_next_round=True)
-process_round("configs/config_microworks.ini", round_number=6, generate_next_round=False)
-process_round("configs/config_microworks.ini", round_number=7, generate_next_round=False)
-process_results("configs/config_microworks.ini", nb_rounds=7)
+#process_round("configs/config_microworks.ini", round_number=0)
+#process_round("configs/config_microworks.ini", round_number=1, generate_next_round=True)
+#process_round("configs/config_microworks.ini", round_number=2, generate_next_round=False)
+#process_round("configs/config_microworks.ini", round_number=3, generate_next_round=True)
+#process_round("configs/config_microworks.ini", round_number=4, generate_next_round=False)
+#process_round("configs/config_microworks.ini", round_number=5, generate_next_round=True)
+#process_round("configs/config_microworks.ini", round_number=6, generate_next_round=False)
+#process_round("configs/config_microworks.ini", round_number=7, generate_next_round=False)
+#process_results("configs/config_microworks.ini", nb_rounds=7)
