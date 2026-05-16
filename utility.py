@@ -143,7 +143,7 @@ def matchmaking(round, players, max_players, prioritize_full=""):
     g = (n + max_players - 1) // max_players # Number of groups
     base_size = n // g
     extra = n % g
-    group_sizes = [base_size + 1] * extra + [base_size] * (g - extra)
+    group_sizes = [base_size] * (g - extra) + [base_size + 1] * extra
     print("Initial group sizes:", group_sizes)
     groups = []
     start = 0
