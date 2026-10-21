@@ -60,7 +60,8 @@ def process_round(config_file, round_number, generate_next_round=False, write_re
             round_factors = config['PARAMS']['GameMultiplicators']
             round_factors = [float(x) for x in config['PARAMS']['GameMultiplicators'].split(",")] if round_factors != "0" else 0
             lobby_factor = float(config['PARAMS']['LobbyMultiplicator'])
-        scores = utility.calculate_score(usernames_with_results, max_players, round_factors=round_factors, lobby_factor=lobby_factor)
+            first_lobby_extra = float(config['PARAMS']['LobbyMultiplicatorExtraFirstLobby'])
+        scores = utility.calculate_score(usernames_with_results, max_players, round_factors=round_factors, lobby_factor=lobby_factor, first_lobby_extra=first_lobby_extra)
         groups = utility.matchmaking(round_number, scores, max_players, config['PARAMS']['PrioritizeFull'])
 
     to_write = []

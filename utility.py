@@ -164,7 +164,7 @@ def matchmaking(round, players, max_players, prioritize_full=""):
                 print(f"Moved {player_to_move} from group {donor_group_index+1} to group {player_group_index+1} to maximize the nb of players in the lobby of {prioritize_full}")
     return groups
 
-def calculate_score(results, max_players, round_factors=0, lobby_factor=0):
+def calculate_score(results, max_players, round_factors=0, lobby_factor=0, first_lobby_extra=0):
     '''
     Calculate the total scores for each player based on their results in every previous round.
 
@@ -183,6 +183,7 @@ def calculate_score(results, max_players, round_factors=0, lobby_factor=0):
     round_factors = [1 for _ in range(len(results))] if round_factors == 0 else round_factors # Score factor for each round, default is 1 (full score)
     nb_lobbies = max(result["lobby"] for round_results in results.values() for result in round_results) # Calculate the number of lobbies based on the results
     lobby_factors = [1 for _ in range(nb_lobbies)] if lobby_factor == 0 else [lobby_factor*lobby+1 for lobby in reversed(range(nb_lobbies))] # Lobby factor for each round, default is 1 (full score)
+    lobby_factors[0] += first_lobby_extra # Add the extra factor for the first lobby
     print("Round factors:", round_factors)
     print("Lobby factors:", lobby_factors)
     if len(round_factors) < len(results):
