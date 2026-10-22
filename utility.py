@@ -2,6 +2,7 @@ import random
 import configparser
 import os.path
 from google.auth.transport.requests import Request
+from google.auth.exceptions import RefreshError
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
@@ -28,13 +29,21 @@ def connect_google_sheets():
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
+            try:
+                creds.refresh(Request())
+            except RefreshError:
+                # The refresh token is no longer usable.
+                creds = None
+
+        # Start a new authorization flow if refreshing failed
+        # or no usable credentials were available.
+        if not creds or not creds.valid:
             flow = InstalledAppFlow.from_client_secrets_file(
                 "credentials.json", SCOPES
             )
             creds = flow.run_local_server(port=0)
-            # Save the credentials for the next run
+
+        # Save the renewed or newly obtained credentials.
         with open("token.json", "w") as token:
             token.write(creds.to_json())
 
@@ -191,6 +200,7 @@ def calculate_score(results, max_players, round_factors=0, lobby_factor=0, first
     for round_results in results.values():
         round += 1
         for result in round_results:
+            print(result, round_results)
             player = result["player"]
             lobby = result["lobby"]
             position = result["position"]

@@ -1,2 +1,4 @@
 configparser
+google_auth_oauthlib
+googleapiclient
 faker
