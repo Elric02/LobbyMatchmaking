@@ -200,12 +200,13 @@ def calculate_score(results, max_players, round_factors=0, lobby_factor=0, first
     for round_results in results.values():
         round += 1
         for result in round_results:
-            print(result, round_results)
             player = result["player"]
             lobby = result["lobby"]
             position = result["position"]
+            nb_players_in_lobby = sum(item.get("lobby") == lobby for item in round_results)
+            normalized_position = 1 + (position - 1) * ((max_players-1) / (nb_players_in_lobby-1)) # Normalize position to a value between 1 and max_players
             # Calculate the score based on position, round factor, and lobby factor
-            score = (1 + (max_players - position)) * round_factors[round - 1]
+            score = (1 + (max_players - normalized_position)) * round_factors[round - 1]
             if round != 1: # Lobby factor is considered only if round >1
                 score *= lobby_factors[lobby - 1] 
             scores[player] = scores.get(player, 0) + score
