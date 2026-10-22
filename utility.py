@@ -168,7 +168,10 @@ def matchmaking(round, players, max_players, prioritize_full=""):
             donor_group_index = next((i for i, group in enumerate(groups) if i != player_group_index and len(group) > 1), None)
             if donor_group_index is not None:
                 # Move a player from the donor group to the player's group
-                player_to_move = groups[donor_group_index].pop() # Take the last player from the donor group
+                if donor_group_index < player_group_index:
+                    player_to_move = groups[donor_group_index].pop() # Take the last player from the donor group
+                else:
+                    player_to_move = groups[donor_group_index].pop(0) # Take the first player from the donor group
                 groups[player_group_index].append(player_to_move) # Add that player to the player's group
                 print(f"Moved {player_to_move} from group {donor_group_index+1} to group {player_group_index+1} to maximize the nb of players in the lobby of {prioritize_full}")
     return groups
